@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>⛵ Family Sailing Tracker</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU2FpbGluZyBDb21mb3J0IFRyYWNrZXIiLCJzaG9ydF9uYW1lIjoiU2FpbGluZ1RyYWNrZXIiLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsInRoZW1lX2NvbG9yIjoiIzAwNjZjYyIsImJhY2tncm91bmRfY29sb3IiOiIjZjBmOGZmIn0=">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0066cc 0%, #4a90e2 50%, #87ceeb 100%);
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 420px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #0066cc, #4a90e2);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(-50px) translateY(-50px); }
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #00ff88;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .form-content {
+            padding: 30px 25px;
+        }
+
+        .sailor-section {
+            margin-bottom: 35px;
+            background: rgba(240, 248, 255, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            position: relative;
+            border-left: 5px solid #0066cc;
+        }
+
+        .sailor-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sailor-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sailor-avatar.christian {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+        }
+
+        .sailor-avatar.frankie {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+        }
+
+        .sailor-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .comfort-slider-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .comfort-value {
+            text-align: center;
+            font-size: 48px;
+            font-weight: 800;
+            margin: 15px 0;
+            background: linear-gradient(45deg, #0066cc, #4a90e2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .comfort-slider {
+            width: 100%;
+            height: 12px;
+            background: linear-gradient(90deg, #ff4757 0%, #ffa502 25%, #2ed573 75%, #1e90ff 100%);
+            border-radius: 10px;
+            outline: none;
+            -webkit-appearance: none;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .comfort-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 30px;
+            height: 30px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            border: 3px solid #0066cc;
+            transition: all 0.2s ease;
+        }
+
+        .comfort-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .comfort-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .conditions-section {
+            margin: 30px 0;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::before {
+            content: '🌊';
+            margin-right: 8px;
+            font-size: 20px;
+        }
+
+        .activity-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .activity-btn {
+            padding: 15px 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .activity-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.2);
+        }
+
+        .activity-btn.selected {
+            background: linear-gradient(45deg, #0066cc, #4a90e2);
+            color: white;
+            border-color: #0066cc;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+        }
+
+        .activity-emoji {
+            font-size: 20px;
+        }
+
+        .notes-container {
+            margin: 25px 0;
+        }
+
+        .notes-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .notes-input:focus {
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .location-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+        }
+
+        .location-input:focus {
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #0066cc, #4a90e2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 102, 204, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .submit-btn.loading {
+            pointer-events: none;
+        }
+
+        .submit-btn.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-container {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .success-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .result-message {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .comfort-summary {
+            background: rgba(240, 248, 255, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .new-checkin-btn {
+            background: rgba(0, 102, 204, 0.1);
+            color: #0066cc;
+            border: 2px solid #0066cc;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .new-checkin-btn:hover {
+            background: #0066cc;
+            color: white;
+        }
+
+        .weather-input {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .weather-field {
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .weather-field:focus {
+            border-color: #0066cc;
+            box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                margin: 5px;
+                border-radius: 15px;
+            }
+            
+            .form-content {
+                padding: 20px 15px;
+            }
+            
+            .activity-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .weather-input {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .offline-indicator {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #ff4757;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-indicator" id="offlineIndicator">
+        📶 Offline Mode
+    </div>
+
+    <div class="app-container">
+        <div class="header">
+            <h1>⛵ Family Sailing Tracker</h1>
+            <div class="subtitle">
+                Comfort Check-In System
+                <span class="status-indicator"></span>
+            </div>
+        </div>
+
+        <div class="form-content" id="formContent">
+            <!-- Christian's Section -->
+            <div class="sailor-section">
+                <div class="sailor-header">
+                    <div class="sailor-avatar christian">👦</div>
+                    <div class="sailor-name">Christian's Comfort</div>
+                </div>
+                <div class="comfort-slider-container">
+                    <div class="comfort-value" id="christianValue">7</div>
+                    <input type="range" id="christianSlider" class="comfort-slider" 
+                           min="1" max="10" value="7" step="1">
+                    <div class="comfort-labels">
+                        <span>😢 Rough</span>
+                        <span>😐 OK</span>
+                        <span>😊 Good</span>
+                        <span>🤩 Amazing!</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Frankie's Section -->
+            <div class="sailor-section">
+                <div class="sailor-header">
+                    <div class="sailor-avatar frankie">👶</div>
+                    <div class="sailor-name">Frankie's Comfort</div>
+                </div>
+                <div class="comfort-slider-container">
+                    <div class="comfort-value" id="frankieValue">7</div>
+                    <input type="range" id="frankieSlider" class="comfort-slider" 
+                           min="1" max="10" value="7" step="1">
+                    <div class="comfort-labels">
+                        <span>😢 Rough</span>
+                        <span>😐 OK</span>
+                        <span>😊 Good</span>
+                        <span>🤩 Amazing!</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Activity -->
+            <div class="conditions-section">
+                <div class="section-title">Current Activity</div>
+                <div class="activity-grid">
+                    <div class="activity-btn selected" onclick="selectActivity(this, 'Sailing')" data-activity="Sailing">
+                        <div class="activity-emoji">⛵</div>
+                        <div>Sailing</div>
+                    </div>
+                    <div class="activity-btn" onclick="selectActivity(this, 'Motoring')" data-activity="Motoring">
+                        <div class="activity-emoji">🚤</div>
+                        <div>Motoring</div>
+                    </div>
+                    <div class="activity-btn" onclick="selectActivity(this, 'Anchored')" data-activity="Anchored">
+                        <div class="activity-emoji">⚓</div>
+                        <div>Anchored</div>
+                    </div>
+                    <div class="activity-btn" onclick="selectActivity(this, 'Eating')" data-activity="Eating">
+                        <div class="activity-emoji">🍽️</div>
+                        <div>Eating</div>
+                    </div>
+                    <div class="activity-btn" onclick="selectActivity(this, 'Swimming')" data-activity="Swimming">
+                        <div class="activity-emoji">🏊</div>
+                        <div>Swimming</div>
+                    </div>
+                    <div class="activity-btn" onclick="selectActivity(this, 'Relaxing')" data-activity="Relaxing">
+                        <div class="activity-emoji">😎</div>
+                        <div>Relaxing</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location -->
+            <div class="conditions-section">
+                <div class="section-title">📍 Location</div>
+                <input type="text" id="locationInput" class="location-input" 
+                       placeholder="e.g., Oyster Bay, Long Island Sound" 
+                       value="Long Island Sound">
+            </div>
+
+            <!-- Weather Conditions -->
+            <div class="conditions-section">
+                <div class="section-title">Weather Conditions</div>
+                <div class="weather-input">
+                    <input type="text" id="windSpeed" class="weather-field" 
+                           placeholder="Wind (e.g., 10-15 kts)">
+                    <input type="text" id="waveHeight" class="weather-field" 
+                           placeholder="Waves (e.g., 1-2 ft)">
+                    <input type="text" id="temperature" class="weather-field" 
+                           placeholder="Temp (e.g., 75°F)">
+                    <input type="text" id="weather" class="weather-field" 
+                           placeholder="Sky (e.g., Sunny)">
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="conditions-section">
+                <div class="section-title">📝 Notes</div>
+                <textarea id="notesInput" class="notes-input" 
+                          placeholder="Any observations about the kids, conditions, or activities..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn" onclick="submitCheckin()">
+                🚀 Submit Check-In
+            </button>
+        </div>
+
+        <!-- Success Result -->
+        <div class="result-container" id="resultContainer">
+            <div class="success-icon">🎉</div>
+            <div class="result-message">Check-in submitted successfully!</div>
+            <div class="comfort-summary" id="comfortSummary">
+                <!-- Will be populated with comfort data -->
+            </div>
+            <button class="new-checkin-btn" onclick="resetForm()">
+                ⛵ New Check-In
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - Your actual n8n webhook URL
+        const WEBHOOK_URL = 'http://localhost:5678/webhook-test/family-comfort-checkin';
+        
+        let selectedActivity = 'Sailing';
+
+        // Initialize comfort sliders
+        function initSliders() {
+            const christianSlider = document.getElementById('christianSlider');
+            const frankieSlider = document.getElementById('frankieSlider');
+            
+            if (christianSlider) {
+                christianSlider.oninput = function() {
+                    updateComfortValue('christian', this.value);
+                };
+            }
+            
+            if (frankieSlider) {
+                frankieSlider.oninput = function() {
+                    updateComfortValue('frankie', this.value);
+                };
+            }
+        }
+
+        function updateComfortValue(sailor, value) {
+            const valueElement = document.getElementById(sailor + 'Value');
+            if (valueElement) {
+                valueElement.textContent = value;
+                
+                // Add visual feedback based on comfort level
+                const numValue = parseInt(value);
+                if (numValue >= 8) {
+                    valueElement.style.color = '#2ed573';
+                } else if (numValue >= 6) {
+                    valueElement.style.color = '#ffa502';
+                } else if (numValue >= 4) {
+                    valueElement.style.color = '#ff6b6b';
+                } else {
+                    valueElement.style.color = '#ff4757';
+                }
+            }
+        }
+
+        function selectActivity(element, activity) {
+            // Remove selected class from all buttons
+            const allButtons = document.querySelectorAll('.activity-btn');
+            allButtons.forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked button
+            if (element) {
+                element.classList.add('selected');
+                selectedActivity = activity;
+                console.log('Selected activity:', activity); // Debug log
+            }
+        }
+
+        async function submitCheckin() {
+            console.log('Submit button clicked!'); // Debug log
+            
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Get form data
+            const christianComfort = document.getElementById('christianSlider').value;
+            const frankieComfort = document.getElementById('frankieSlider').value;
+            const location = document.getElementById('locationInput').value || 'Long Island Sound';
+            const notes = document.getElementById('notesInput').value;
+            const windSpeed = document.getElementById('windSpeed').value || 'Unknown';
+            const waveHeight = document.getElementById('waveHeight').value || 'Unknown';
+            const temperature = document.getElementById('temperature').value || 'Unknown';
+            const weather = document.getElementById('weather').value || 'Unknown';
+            
+            // Prepare data
+            const data = {
+                christian_comfort: christianComfort,
+                frankie_comfort: frankieComfort,
+                current_activity: selectedActivity,
+                location: location,
+                notes: notes,
+                wind_speed: windSpeed,
+                wave_height: waveHeight,
+                temperature: temperature,
+                weather: weather,
+                timestamp: new Date().toISOString(),
+                parent_notes: `Submitted via mobile app at ${new Date().toLocaleTimeString()}`
+            };
+
+            console.log('Sending data:', data); // Debug log
+
+            // Show loading state
+            submitBtn.classList.add('loading');
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            try {
+                console.log('Fetching:', WEBHOOK_URL); // Debug log
+                
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                console.log('Response:', response); // Debug log
+
+                if (response.ok) {
+                    showSuccess(data);
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error('Error submitting check-in:', error);
+                
+                // Store offline for later submission
+                storeOfflineData(data);
+                
+                // Show offline success
+                showOfflineSuccess(data);
+            }
+
+            // Reset button state
+            submitBtn.classList.remove('loading');
+            submitBtn.textContent = '🚀 Submit Check-In';
+            submitBtn.disabled = false;
+        }
+
+        function showSuccess(data) {
+            const avgComfort = ((parseInt(data.christian_comfort) + parseInt(data.frankie_comfort)) / 2).toFixed(1);
+            
+            // Hide form and show result
+            document.getElementById('formContent').style.display = 'none';
+            document.getElementById('resultContainer').classList.add('show');
+            
+            // Update summary
+            const summary = document.getElementById('comfortSummary');
+            summary.innerHTML = `
+                <div class="summary-row">
+                    <span>👦 Christian:</span>
+                    <span><strong>${data.christian_comfort}/10</strong></span>
+                </div>
+                <div class="summary-row">
+                    <span>👶 Frankie:</span>
+                    <span><strong>${data.frankie_comfort}/10</strong></span>
+                </div>
+                <div class="summary-row">
+                    <span>📊 Average:</span>
+                    <span><strong>${avgComfort}/10</strong></span>
+                </div>
+                <div class="summary-row">
+                    <span>⛵ Activity:</span>
+                    <span><strong>${data.current_activity}</strong></span>
+                </div>
+                <div class="summary-row">
+                    <span>📍 Location:</span>
+                    <span><strong>${data.location}</strong></span>
+                </div>
+            `;
+
+            // Auto-scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showOfflineSuccess(data) {
+            document.getElementById('offlineIndicator').style.display = 'block';
+            showSuccess(data);
+            
+            // Update result message for offline
+            document.querySelector('.result-message').textContent = 
+                'Saved offline! Will sync when connection returns.';
+        }
+
+        function storeOfflineData(data) {
+            const offlineData = JSON.parse(localStorage.getItem('offlineCheckins') || '[]');
+            offlineData.push(data);
+            localStorage.setItem('offlineCheckins', JSON.stringify(offlineData));
+        }
+
+        async function syncOfflineData() {
+            const offlineData = JSON.parse(localStorage.getItem('offlineCheckins') || '[]');
+            
+            for (const data of offlineData) {
+                try {
+                    await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                } catch (error) {
+                    console.log('Still offline, will retry later');
+                    return;
+                }
+            }
+            
+            // Clear synced data
+            localStorage.removeItem('offlineCheckins');
+            document.getElementById('offlineIndicator').style.display = 'none';
+        }
+
+        function resetForm() {
+            // Hide result and show form
+            document.getElementById('resultContainer').classList.remove('show');
+            document.getElementById('formContent').style.display = 'block';
+            
+            // Reset form values
+            document.getElementById('christianSlider').value = 7;
+            document.getElementById('frankieSlider').value = 7;
+            updateComfortValue('christian', 7);
+            updateComfortValue('frankie', 7);
+            
+            document.getElementById('notesInput').value = '';
+            document.getElementById('windSpeed').value = '';
+            document.getElementById('waveHeight').value = '';
+            document.getElementById('temperature').value = '';
+            document.getElementById('weather').value = '';
+            
+            // Reset activity to sailing
+            document.querySelectorAll('.activity-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            document.querySelector('.activity-btn').classList.add('selected');
+            selectedActivity = 'Sailing';
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('App initializing...'); // Debug log
+            
+            initSliders();
+            
+            // Initialize comfort values
+            updateComfortValue('christian', 7);
+            updateComfortValue('frankie', 7);
+            
+            // Set up activity buttons
+            const activityButtons = document.querySelectorAll('.activity-btn');
+            activityButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const activity = this.getAttribute('data-activity') || 
+                                   this.querySelector('div:last-child').textContent;
+                    selectActivity(this, activity);
+                });
+            });
+            
+            // Try to sync offline data on load
+            if (navigator.onLine) {
+                syncOfflineData();
+            }
+            
+            // Set up online/offline detection
+            window.addEventListener('online', syncOfflineData);
+            window.addEventListener('offline', () => {
+                document.getElementById('offlineIndicator').style.display = 'block';
+            });
+            
+            console.log('App initialized successfully!'); // Debug log
+        });
+
+        // PWA installation prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            deferredPrompt = e;
+            // You could show an install button here
+        });
+    </script>
+</body>
+</html>

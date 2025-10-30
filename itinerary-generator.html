@@ -418,6 +418,7 @@
                 <div class="control-item">
                     <label>Starting Point</label>
                     <select id="startLocation">
+                        <option value="centerport" selected>Centerport Yacht Club, NY</option>
                         <option value="oyster-bay">Oyster Bay, NY</option>
                         <option value="port-washington">Port Washington, NY</option>
                         <option value="port-jefferson">Port Jefferson, NY</option>
@@ -456,6 +457,19 @@
     <script>
         // Comprehensive destination database for Long Island Sound
         const destinations = {
+            'centerport': {
+                name: 'Centerport',
+                state: 'NY',
+                description: 'Excellent yacht club with protected harbor in Centerport Harbor',
+                activities: ['Yacht Club', 'Beach', 'Museums', 'Restaurants'],
+                highlights: [
+                    'Centerport Yacht Club - great facilities',
+                    'Vanderbilt Museum & Planetarium nearby',
+                    'Protected harbor with moorings',
+                    'Close to Northport village'
+                ],
+                bestFor: 'All ages'
+            },
             'oyster-bay': {
                 name: 'Oyster Bay',
                 state: 'NY',
@@ -696,6 +710,14 @@
         function calculateDistance(from, to) {
             // Approximate nautical miles between major points
             const distances = {
+                'centerport-port-jefferson': 10,
+                'centerport-oyster-bay': 12,
+                'centerport-port-washington': 15,
+                'centerport-norwalk': 15,
+                'centerport-greenport': 35,
+                'centerport-stamford': 18,
+                'centerport-westport': 16,
+                'centerport-shelter-island': 38,
                 'oyster-bay-port-washington': 8,
                 'port-washington-port-jefferson': 18,
                 'port-jefferson-greenport': 25,
@@ -751,6 +773,9 @@
 
         function generateDaySail(start, focus) {
             const daySails = {
+                'centerport': [
+                    { from: start, to: 'port-jefferson', lunch: 'port-jefferson', activities: ['Mini golf', 'Ice cream', 'Village walk'] }
+                ],
                 'oyster-bay': [
                     { from: start, to: 'port-washington', lunch: 'port-washington', activities: ['Lunch', 'Ice cream', 'Playground'] }
                 ],
@@ -780,6 +805,22 @@
 
         function generateWeekendTrip(start, focus) {
             const trips = {
+                'centerport': [
+                    {
+                        day: 1,
+                        title: 'Cruise to Charming Norwalk',
+                        route: [
+                            { from: 'centerport', to: 'norwalk', overnight: 'norwalk' }
+                        ]
+                    },
+                    {
+                        day: 2,
+                        title: 'Maritime Aquarium & Return',
+                        route: [
+                            { from: 'norwalk', to: 'centerport', activities: ['Morning at aquarium', 'Afternoon sail'] }
+                        ]
+                    }
+                ],
                 'oyster-bay': [
                     {
                         day: 1,
@@ -885,7 +926,7 @@
         }
 
         function generateWeekTrip(start, focus) {
-            if (start.includes('oyster') || start.includes('port-washington') || start.includes('port-jefferson')) {
+            if (start.includes('centerport') || start.includes('oyster') || start.includes('port-washington') || start.includes('port-jefferson')) {
                 // North Shore NY route
                 return [
                     {

@@ -600,6 +600,11 @@
                 </div>
 
                 <div class="control-item">
+                    <label>Trip Start Date</label>
+                    <input type="date" id="startDate" required>
+                </div>
+
+                <div class="control-item">
                     <label>Season</label>
                     <select id="season">
                         <option value="spring">Spring (May-June)</option>
@@ -607,6 +612,13 @@
                         <option value="fall">Fall (Sept-Oct)</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="warning-box" style="margin: 20px 0;">
+                <strong>⚠️ SAFETY WARNING:</strong> This itinerary planner provides general route planning and harbor information only.
+                <strong>You MUST check actual weather forecasts, tide tables, and marine conditions before departure.</strong>
+                The "harbor tips" below are general seasonal characteristics, NOT real-time forecasts.
+                Always consult NOAA weather, tide charts, and current marine forecasts before sailing.
             </div>
 
             <!-- Sailing Preferences -->
@@ -830,7 +842,7 @@
                     <div class="checkbox-grid">
                         <div class="checkbox-item">
                             <input type="checkbox" id="show-weather" checked>
-                            <label for="show-weather">Weather & Wind Tips</label>
+                            <label for="show-weather">Harbor Characteristics (NOT forecasts)</label>
                         </div>
                         <div class="checkbox-item">
                             <input type="checkbox" id="show-provisioning" checked>
@@ -1239,30 +1251,42 @@
         }
 
         function generateItinerary() {
-            const duration = document.getElementById('duration').value;
-            const startLocation = document.getElementById('startLocation').value;
-            const kidsAges = document.getElementById('kidsAges').value;
-            const focus = document.getElementById('focus').value;
+            try {
+                const duration = document.getElementById('duration').value;
+                const startLocation = document.getElementById('startLocation').value;
+                const kidsAges = document.getElementById('kidsAges').value;
+                const startDate = document.getElementById('startDate').value;
+                const experience = document.getElementById('experience')?.value || 'intermediate';
 
-            let itinerary = [];
+                // Validate date is provided
+                if (!startDate) {
+                    alert('⚠️ Please enter a trip start date before generating your itinerary.');
+                    return;
+                }
 
-            // Generate itinerary based on duration
-            switch(duration) {
-                case 'day':
-                    itinerary = generateDaySail(startLocation, focus);
-                    break;
-                case 'weekend':
-                    itinerary = generateWeekendTrip(startLocation, focus);
-                    break;
-                case 'week':
-                    itinerary = generateWeekTrip(startLocation, focus);
-                    break;
-                case 'extended':
-                    itinerary = generateExtendedTrip(startLocation, focus);
-                    break;
+                let itinerary = [];
+
+                // Generate itinerary based on duration
+                switch(duration) {
+                    case 'day':
+                        itinerary = generateDaySail(startLocation, experience);
+                        break;
+                    case 'weekend':
+                        itinerary = generateWeekendTrip(startLocation, experience);
+                        break;
+                    case 'week':
+                        itinerary = generateWeekTrip(startLocation, experience);
+                        break;
+                    case 'extended':
+                        itinerary = generateExtendedTrip(startLocation, experience);
+                        break;
+                }
+
+                displayItinerary(itinerary, duration, kidsAges, startDate);
+            } catch (error) {
+                console.error('Error generating itinerary:', error);
+                alert('Error generating itinerary. Please check the console for details.');
             }
-
-            displayItinerary(itinerary, duration, kidsAges);
         }
 
         function generateDaySail(start, focus) {
@@ -1579,7 +1603,7 @@
             ];
         }
 
-        function displayItinerary(itinerary, duration, kidsAges) {
+        function displayItinerary(itinerary, duration, kidsAges, startDate) {
             const container = document.getElementById('itineraryContainer');
 
             // Calculate total distance
@@ -1592,11 +1616,24 @@
 
             const avgDailyDistance = (totalDistance / itinerary.length).toFixed(1);
 
+            // Format start date
+            const dateObj = new Date(startDate);
+            const formattedDate = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
             let html = `
+                <div class="warning-box" style="margin-bottom: 20px;">
+                    <strong>⚠️ CRITICAL SAFETY REMINDER:</strong><br>
+                    Before departure, you MUST check:<br>
+                    • NOAA Marine Weather Forecast: <a href="https://www.weather.gov/marine" target="_blank">weather.gov/marine</a><br>
+                    • NOAA Tide Predictions: <a href="https://tidesandcurrents.noaa.gov" target="_blank">tidesandcurrents.noaa.gov</a><br>
+                    • Current Conditions & Warnings<br>
+                    This itinerary provides general harbor information only, NOT real-time conditions.
+                </div>
+
                 <div class="itinerary-header">
                     <h2>Your Custom ${duration.charAt(0).toUpperCase() + duration.slice(1)} Sailing Itinerary</h2>
                     <p style="color: #666; margin-top: 10px;">
-                        Perfect for ${kidsAges || 'your family'} • Long Island Sound & Connecticut Coast
+                        Starting: ${formattedDate} • Perfect for ${kidsAges || 'your family'} • Long Island Sound & Connecticut Coast
                     </p>
                     <div class="itinerary-stats">
                         <div class="stat">
@@ -1619,13 +1656,25 @@
                 </div>
             `;
 
-            itinerary.forEach(day => {
+            itinerary.forEach((day, index) => {
+                // Calculate date for this day
+                const dayDate = new Date(startDate);
+                dayDate.setDate(dayDate.getDate() + index);
+                const formattedDayDate = dayDate.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric'
+                });
+
                 html += `
                     <div class="day-section">
                         <div class="day-header">
                             <div class="day-number">${day.day}</div>
                             <div class="day-title">
                                 <h3>${day.title}</h3>
+                                <div class="day-subtitle" style="font-weight: 600; color: #0066cc; margin-bottom: 5px;">
+                                    📅 ${formattedDayDate}
+                                </div>
                                 <div class="day-subtitle">
                                     ${day.route.map(leg => {
                                         const dist = calculateDistance(leg.from, leg.to);
@@ -1678,15 +1727,21 @@
 
                                 ${showWeather && dest.weatherTips ? `
                                     <div class="weather-info">
-                                        <h5>⛅ Weather & Harbor Tips</h5>
+                                        <h5>⛅ Harbor Characteristics (General - NOT a forecast)</h5>
                                         <p style="margin: 0; font-size: 14px;">${dest.weatherTips}</p>
+                                        <p style="margin-top: 8px; font-size: 12px; color: #666; font-style: italic;">
+                                            ⚠️ Check NOAA forecast before sailing
+                                        </p>
                                     </div>
                                 ` : ''}
 
                                 ${showTides && dest.tidalNotes ? `
                                     <div class="weather-info">
-                                        <h5>🌊 Tides & Currents</h5>
+                                        <h5>🌊 Tidal Information (General - Check NOAA for exact times)</h5>
                                         <p style="margin: 0; font-size: 14px;">${dest.tidalNotes}</p>
+                                        <p style="margin-top: 8px; font-size: 12px; color: #666; font-style: italic;">
+                                            ⚠️ Get actual tide tables before sailing
+                                        </p>
                                     </div>
                                 ` : ''}
 

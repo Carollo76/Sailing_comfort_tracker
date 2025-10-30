@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⛵ Long Island Sound Cruise Itinerary Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0066cc 0%, #4a90e2 50%, #87ceeb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0066cc, #4a90e2);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e1e8ed;
+        }
+
+        .control-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-item label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .control-item select, .control-item input {
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .control-item select:focus, .control-item input:focus {
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, #0066cc, #4a90e2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 102, 204, 0.4);
+        }
+
+        .itinerary-container {
+            padding: 30px;
+            display: none;
+        }
+
+        .itinerary-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .itinerary-header {
+            background: linear-gradient(135deg, #f0f8ff, #e6f3ff);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 5px solid #0066cc;
+        }
+
+        .itinerary-header h2 {
+            color: #0066cc;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .itinerary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0066cc;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+
+        .day-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #e1e8ed;
+        }
+
+        .day-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #0066cc;
+        }
+
+        .day-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #0066cc, #4a90e2);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin-right: 15px;
+        }
+
+        .day-title {
+            flex: 1;
+        }
+
+        .day-title h3 {
+            font-size: 22px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .day-subtitle {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .location-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .location-header {
+            display: flex;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .location-icon {
+            font-size: 32px;
+            margin-right: 15px;
+        }
+
+        .location-info h4 {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .location-distance {
+            font-size: 14px;
+            color: #0066cc;
+            font-weight: 600;
+        }
+
+        .location-description {
+            margin: 15px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .activities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .activity-tag {
+            background: linear-gradient(45deg, #0066cc, #4a90e2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .highlights {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .highlights h5 {
+            color: #0066cc;
+            margin-bottom: 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .highlights ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .highlights li {
+            padding: 5px 0;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .highlights li:before {
+            content: "✓";
+            color: #0066cc;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .route-info {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .route-info h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tips-section {
+            background: #fff9e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 5px solid #ffa502;
+        }
+
+        .tips-section h3 {
+            color: #f39c12;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tips-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tips-section li {
+            padding: 8px 0;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .tips-section li:before {
+            content: "💡";
+            margin-right: 8px;
+        }
+
+        .print-btn {
+            background: white;
+            color: #0066cc;
+            border: 2px solid #0066cc;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .print-btn:hover {
+            background: #0066cc;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .control-group {
+                grid-template-columns: 1fr;
+            }
+
+            .itinerary-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .day-number {
+                margin-bottom: 10px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .controls, .print-btn, .generate-btn {
+                display: none;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⛵ Long Island Sound Family Cruise Planner</h1>
+            <p>Create the perfect sailing adventure for your family</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <div class="control-item">
+                    <label>Trip Duration</label>
+                    <select id="duration">
+                        <option value="day">Day Sail</option>
+                        <option value="weekend" selected>Weekend (2-3 days)</option>
+                        <option value="week">Week Long</option>
+                        <option value="extended">Extended (10+ days)</option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <label>Starting Point</label>
+                    <select id="startLocation">
+                        <option value="oyster-bay">Oyster Bay, NY</option>
+                        <option value="port-washington">Port Washington, NY</option>
+                        <option value="port-jefferson">Port Jefferson, NY</option>
+                        <option value="norwalk">Norwalk, CT</option>
+                        <option value="stamford">Stamford, CT</option>
+                        <option value="bridgeport">Bridgeport, CT</option>
+                    </select>
+                </div>
+
+                <div class="control-item">
+                    <label>Kids' Ages</label>
+                    <input type="text" id="kidsAges" placeholder="e.g., 4, 7, 10">
+                </div>
+
+                <div class="control-item">
+                    <label>Focus</label>
+                    <select id="focus">
+                        <option value="balanced">Balanced (Mix of everything)</option>
+                        <option value="relaxed">Relaxed (Short hops)</option>
+                        <option value="adventure">Adventure (More sailing)</option>
+                        <option value="educational">Educational (Museums & Nature)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="generate-btn" onclick="generateItinerary()">
+                🗺️ Generate My Itinerary
+            </button>
+        </div>
+
+        <div class="itinerary-container" id="itineraryContainer">
+            <!-- Generated itinerary will appear here -->
+        </div>
+    </div>
+
+    <script>
+        // Comprehensive destination database for Long Island Sound
+        const destinations = {
+            'oyster-bay': {
+                name: 'Oyster Bay',
+                state: 'NY',
+                description: 'Historic harbor town with excellent protection and family amenities',
+                activities: ['Swimming', 'Beach', 'Historic Sites', 'Restaurants'],
+                highlights: [
+                    'Teddy Roosevelt\'s Sagamore Hill',
+                    'Beautiful downtown with ice cream shops',
+                    'Protected anchorage',
+                    'Rainy Day Books for kids'
+                ],
+                bestFor: 'All ages'
+            },
+            'port-washington': {
+                name: 'Port Washington',
+                state: 'NY',
+                description: 'Excellent marina facilities and easy access to beaches',
+                activities: ['Marina', 'Restaurants', 'Playground'],
+                highlights: [
+                    'Town dock right downtown',
+                    'Multiple playgrounds nearby',
+                    'Great pizza and ice cream',
+                    'Walking distance to everything'
+                ],
+                bestFor: 'Young families'
+            },
+            'port-jefferson': {
+                name: 'Port Jefferson',
+                state: 'NY',
+                description: 'Vibrant harbor village with endless family entertainment',
+                activities: ['Shopping', 'Dining', 'Beach', 'Mini Golf'],
+                highlights: [
+                    'Mini golf on the harbor',
+                    'Excellent ice cream at Uncle Bacala\'s',
+                    'Village center with shops',
+                    'Floating docks available'
+                ],
+                bestFor: 'Ages 5+'
+            },
+            'greenport': {
+                name: 'Greenport',
+                state: 'NY',
+                description: 'Charming maritime village on the North Fork',
+                activities: ['Carousel', 'Museums', 'Restaurants', 'Beach'],
+                highlights: [
+                    'Mitchell Park Marina with carousel',
+                    'East End Seaport Museum',
+                    'Excellent seafood restaurants',
+                    'Splish Splash water park nearby'
+                ],
+                bestFor: 'All ages'
+            },
+            'shelter-island': {
+                name: 'Shelter Island',
+                state: 'NY',
+                description: 'Peaceful island retreat with pristine beaches',
+                activities: ['Swimming', 'Nature', 'Kayaking', 'Beach'],
+                highlights: [
+                    'Pristine Crescent Beach',
+                    'Nature preserve hiking',
+                    'Very protected anchorages',
+                    'Quiet and relaxing'
+                ],
+                bestFor: 'Nature-loving families'
+            },
+            'sag-harbor': {
+                name: 'Sag Harbor',
+                state: 'NY',
+                description: 'Historic whaling village with upscale charm',
+                activities: ['Museums', 'Shopping', 'Restaurants', 'Beach'],
+                highlights: [
+                    'Whaling Museum',
+                    'Charming downtown shops',
+                    'Excellent dining',
+                    'Beautiful historic homes'
+                ],
+                bestFor: 'Ages 8+'
+            },
+            'norwalk': {
+                name: 'Norwalk',
+                state: 'CT',
+                description: 'Great family destination with aquarium',
+                activities: ['Aquarium', 'Museums', 'Restaurants', 'Beach'],
+                highlights: [
+                    'Maritime Aquarium - must visit!',
+                    'IMAX theater',
+                    'SoNo district shopping',
+                    'Excellent pizza'
+                ],
+                bestFor: 'All ages'
+            },
+            'westport': {
+                name: 'Westport',
+                state: 'CT',
+                description: 'Upscale harbor with beautiful beaches',
+                activities: ['Beach', 'Nature', 'Restaurants'],
+                highlights: [
+                    'Compo Beach nearby',
+                    'Nature trails',
+                    'Great restaurants',
+                    'Clean, well-maintained facilities'
+                ],
+                bestFor: 'All ages'
+            },
+            'black-rock': {
+                name: 'Black Rock Harbor',
+                state: 'CT',
+                description: 'Protected harbor near Bridgeport',
+                activities: ['Beach', 'Park', 'Museums'],
+                highlights: [
+                    'Captain\'s Cove Seaport',
+                    'Black Rock Castle playground',
+                    'St. Mary\'s by the Sea',
+                    'Beardsley Zoo nearby'
+                ],
+                bestFor: 'Young kids'
+            },
+            'milford': {
+                name: 'Milford',
+                state: 'CT',
+                description: 'Family-friendly harbor with great beaches',
+                activities: ['Swimming', 'Beach', 'Restaurants'],
+                highlights: [
+                    'Silver Sands State Park',
+                    'Charles Island (walk at low tide)',
+                    'Ice cream on the beach',
+                    'Calm waters for kids'
+                ],
+                bestFor: 'Beach lovers'
+            },
+            'branford': {
+                name: 'Branford',
+                state: 'CT',
+                description: 'Scenic harbor with the Thimble Islands',
+                activities: ['Island Tour', 'Swimming', 'Restaurants'],
+                highlights: [
+                    'Thimble Islands cruise',
+                    'Great swimming areas',
+                    'Stony Creek village',
+                    'Unique island geology'
+                ],
+                bestFor: 'Ages 6+'
+            },
+            'essex': {
+                name: 'Essex',
+                state: 'CT',
+                description: 'America\'s best small town with maritime heritage',
+                activities: ['Museums', 'Trains', 'Restaurants', 'Shopping'],
+                highlights: [
+                    'Connecticut River Museum',
+                    'Essex Steam Train & Riverboat',
+                    'Charming Main Street',
+                    'Griswold Inn (historic)'
+                ],
+                bestFor: 'All ages'
+            },
+            'mystic': {
+                name: 'Mystic',
+                state: 'CT',
+                description: 'World-class maritime destination',
+                activities: ['Aquarium', 'Seaport', 'Museums', 'Restaurants'],
+                highlights: [
+                    'Mystic Aquarium - whales & penguins',
+                    'Mystic Seaport Museum',
+                    'Historic ships to explore',
+                    'Mystic Pizza!'
+                ],
+                bestFor: 'All ages - don\'t miss!'
+            },
+            'stonington': {
+                name: 'Stonington',
+                state: 'CT',
+                description: 'Picturesque fishing village',
+                activities: ['Shopping', 'Lighthouse', 'Restaurants', 'Beach'],
+                highlights: [
+                    'Old Lighthouse Museum',
+                    'Quaint shopping street',
+                    'Excellent seafood',
+                    'Beautiful stonework'
+                ],
+                bestFor: 'Ages 8+'
+            },
+            'noank': {
+                name: 'Noank',
+                state: 'CT',
+                description: 'Tiny authentic fishing village',
+                activities: ['Swimming', 'Restaurants', 'Beach'],
+                highlights: [
+                    'Abbott\'s Lobster in the Rough',
+                    'Rocky beaches to explore',
+                    'Working waterfront',
+                    'Palmer Cove for swimming'
+                ],
+                bestFor: 'Seafood lovers'
+            },
+            'clinton': {
+                name: 'Clinton Harbor',
+                state: 'CT',
+                description: 'Protected harbor with beach access',
+                activities: ['Beach', 'Swimming', 'Restaurants'],
+                highlights: [
+                    'Town beach nearby',
+                    'Cedar Island Marina',
+                    'Ice cream shops',
+                    'Family restaurants'
+                ],
+                bestFor: 'Beach families'
+            },
+            'sheffield-island': {
+                name: 'Sheffield Island',
+                state: 'CT',
+                description: 'Scenic island with historic lighthouse',
+                activities: ['Lighthouse', 'Picnic', 'Nature', 'Beach'],
+                highlights: [
+                    'Beautiful lighthouse (tours available)',
+                    'Perfect for picnics',
+                    'Great swimming beach',
+                    'Seal watching in season'
+                ],
+                bestFor: 'All ages'
+            },
+            'block-island': {
+                name: 'Block Island',
+                state: 'RI',
+                description: 'Beautiful island destination (longer passage)',
+                activities: ['Beach', 'Biking', 'Lighthouse', 'Nature'],
+                highlights: [
+                    'Spectacular beaches',
+                    'Bike the island with kids',
+                    'Mohegan Bluffs',
+                    'Multiple lighthouses'
+                ],
+                bestFor: 'Experienced young sailors'
+            }
+        };
+
+        // Route calculator
+        function calculateDistance(from, to) {
+            // Approximate nautical miles between major points
+            const distances = {
+                'oyster-bay-port-washington': 8,
+                'port-washington-port-jefferson': 18,
+                'port-jefferson-greenport': 25,
+                'greenport-shelter-island': 5,
+                'shelter-island-sag-harbor': 3,
+                'oyster-bay-norwalk': 12,
+                'norwalk-westport': 8,
+                'westport-black-rock': 12,
+                'black-rock-milford': 8,
+                'milford-branford': 7,
+                'branford-clinton': 10,
+                'clinton-essex': 15,
+                'essex-mystic': 25,
+                'mystic-stonington': 4,
+                'stonington-noank': 2,
+                'norwalk-sheffield-island': 6,
+                'mystic-block-island': 35,
+                'greenport-block-island': 40
+            };
+
+            const key = `${from}-${to}`;
+            const reverseKey = `${to}-${from}`;
+
+            return distances[key] || distances[reverseKey] || 10; // Default estimate
+        }
+
+        function generateItinerary() {
+            const duration = document.getElementById('duration').value;
+            const startLocation = document.getElementById('startLocation').value;
+            const kidsAges = document.getElementById('kidsAges').value;
+            const focus = document.getElementById('focus').value;
+
+            let itinerary = [];
+
+            // Generate itinerary based on duration
+            switch(duration) {
+                case 'day':
+                    itinerary = generateDaySail(startLocation, focus);
+                    break;
+                case 'weekend':
+                    itinerary = generateWeekendTrip(startLocation, focus);
+                    break;
+                case 'week':
+                    itinerary = generateWeekTrip(startLocation, focus);
+                    break;
+                case 'extended':
+                    itinerary = generateExtendedTrip(startLocation, focus);
+                    break;
+            }
+
+            displayItinerary(itinerary, duration, kidsAges);
+        }
+
+        function generateDaySail(start, focus) {
+            const daySails = {
+                'oyster-bay': [
+                    { from: start, to: 'port-washington', lunch: 'port-washington', activities: ['Lunch', 'Ice cream', 'Playground'] }
+                ],
+                'port-washington': [
+                    { from: start, to: 'oyster-bay', lunch: 'oyster-bay', activities: ['Historic tour', 'Beach time'] }
+                ],
+                'port-jefferson': [
+                    { from: start, to: 'port-jefferson', lunch: 'port-jefferson', activities: ['Mini golf', 'Village walk'] }
+                ],
+                'norwalk': [
+                    { from: start, to: 'sheffield-island', lunch: 'norwalk', activities: ['Lighthouse visit', 'Swimming'] }
+                ],
+                'stamford': [
+                    { from: start, to: 'norwalk', lunch: 'norwalk', activities: ['Aquarium', 'SoNo district'] }
+                ],
+                'bridgeport': [
+                    { from: start, to: 'milford', lunch: 'milford', activities: ['Silver Sands beach', 'Charles Island'] }
+                ]
+            };
+
+            return [{
+                day: 1,
+                title: 'Fun Day Sail',
+                route: daySails[start] || daySails['oyster-bay']
+            }];
+        }
+
+        function generateWeekendTrip(start, focus) {
+            const trips = {
+                'oyster-bay': [
+                    {
+                        day: 1,
+                        title: 'Head East to Historic Port Jefferson',
+                        route: [
+                            { from: 'oyster-bay', to: 'port-jefferson', overnight: 'port-jefferson' }
+                        ]
+                    },
+                    {
+                        day: 2,
+                        title: 'Explore & Sail Home',
+                        route: [
+                            { from: 'port-jefferson', to: 'oyster-bay', activities: ['Morning mini golf', 'Leisurely sail back'] }
+                        ]
+                    }
+                ],
+                'port-washington': [
+                    {
+                        day: 1,
+                        title: 'Cruise to Charming Norwalk',
+                        route: [
+                            { from: 'port-washington', to: 'norwalk', overnight: 'norwalk' }
+                        ]
+                    },
+                    {
+                        day: 2,
+                        title: 'Maritime Aquarium & Return',
+                        route: [
+                            { from: 'norwalk', to: 'port-washington', activities: ['Morning at aquarium', 'Afternoon sail'] }
+                        ]
+                    }
+                ],
+                'port-jefferson': [
+                    {
+                        day: 1,
+                        title: 'North Fork Adventure to Greenport',
+                        route: [
+                            { from: 'port-jefferson', to: 'greenport', overnight: 'greenport' }
+                        ]
+                    },
+                    {
+                        day: 2,
+                        title: 'Carousel Fun & Return Sail',
+                        route: [
+                            { from: 'greenport', to: 'shelter-island', lunch: 'shelter-island' },
+                            { from: 'shelter-island', to: 'port-jefferson', overnight: 'port-jefferson' }
+                        ]
+                    }
+                ],
+                'norwalk': [
+                    {
+                        day: 1,
+                        title: 'Coastal Cruise to Essex',
+                        route: [
+                            { from: 'norwalk', to: 'branford', lunch: 'branford' },
+                            { from: 'branford', to: 'essex', overnight: 'essex' }
+                        ]
+                    },
+                    {
+                        day: 2,
+                        title: 'Steam Train & Sail Home',
+                        route: [
+                            { from: 'essex', to: 'clinton', activities: ['Morning steam train ride'] },
+                            { from: 'clinton', to: 'norwalk', overnight: 'norwalk' }
+                        ]
+                    }
+                ],
+                'stamford': [
+                    {
+                        day: 1,
+                        title: 'Sail to the Thimble Islands',
+                        route: [
+                            { from: 'stamford', to: 'branford', overnight: 'branford' }
+                        ]
+                    },
+                    {
+                        day: 2,
+                        title: 'Island Tour & Return',
+                        route: [
+                            { from: 'branford', to: 'stamford', activities: ['Thimble Islands cruise', 'Beach time'] }
+                        ]
+                    }
+                ],
+                'bridgeport': [
+                    {
+                        day: 1,
+                        title: 'Beautiful Essex Adventure',
+                        route: [
+                            { from: 'bridgeport', to: 'essex', overnight: 'essex' }
+                        ]
+                    },
+                    {
+                        day: 2,
+                        title: 'Connecticut River Exploration',
+                        route: [
+                            { from: 'essex', to: 'bridgeport', activities: ['River museum', 'Main Street walk'] }
+                        ]
+                    }
+                ]
+            };
+
+            return trips[start] || trips['oyster-bay'];
+        }
+
+        function generateWeekTrip(start, focus) {
+            if (start.includes('oyster') || start.includes('port-washington') || start.includes('port-jefferson')) {
+                // North Shore NY route
+                return [
+                    {
+                        day: 1,
+                        title: 'Start Your Adventure - Port Jefferson',
+                        route: [{ from: start, to: 'port-jefferson', overnight: 'port-jefferson' }]
+                    },
+                    {
+                        day: 2,
+                        title: 'North Fork to Greenport',
+                        route: [{ from: 'port-jefferson', to: 'greenport', overnight: 'greenport' }]
+                    },
+                    {
+                        day: 3,
+                        title: 'Island Paradise - Shelter Island',
+                        route: [{ from: 'greenport', to: 'shelter-island', overnight: 'shelter-island' }]
+                    },
+                    {
+                        day: 4,
+                        title: 'Cross to Connecticut - Mystic',
+                        route: [
+                            { from: 'shelter-island', to: 'mystic', overnight: 'mystic' }
+                        ]
+                    },
+                    {
+                        day: 5,
+                        title: 'Explore Mystic Attractions',
+                        route: [{ from: 'mystic', to: 'stonington', overnight: 'stonington', activities: ['Full day at Mystic Seaport & Aquarium'] }]
+                    },
+                    {
+                        day: 6,
+                        title: 'Beautiful Essex',
+                        route: [{ from: 'stonington', to: 'essex', overnight: 'essex' }]
+                    },
+                    {
+                        day: 7,
+                        title: 'Return Journey Home',
+                        route: [{ from: 'essex', to: start, activities: ['Leisurely sail'] }]
+                    }
+                ];
+            } else {
+                // Connecticut route
+                return [
+                    {
+                        day: 1,
+                        title: 'Begin Your Journey',
+                        route: [{ from: start, to: 'westport', overnight: 'westport' }]
+                    },
+                    {
+                        day: 2,
+                        title: 'Family Fun at Norwalk Aquarium',
+                        route: [{ from: 'westport', to: 'norwalk', overnight: 'norwalk' }]
+                    },
+                    {
+                        day: 3,
+                        title: 'Coastal Cruise to Milford',
+                        route: [{ from: 'norwalk', to: 'milford', overnight: 'milford' }]
+                    },
+                    {
+                        day: 4,
+                        title: 'Thimble Islands Adventure',
+                        route: [{ from: 'milford', to: 'branford', overnight: 'branford' }]
+                    },
+                    {
+                        day: 5,
+                        title: 'America\'s Best Small Town - Essex',
+                        route: [{ from: 'branford', to: 'essex', overnight: 'essex' }]
+                    },
+                    {
+                        day: 6,
+                        title: 'Mystic Magic',
+                        route: [{ from: 'essex', to: 'mystic', overnight: 'mystic' }]
+                    },
+                    {
+                        day: 7,
+                        title: 'Head for Home',
+                        route: [{ from: 'mystic', to: start, activities: ['Morning at aquarium'] }]
+                    }
+                ];
+            }
+        }
+
+        function generateExtendedTrip(start, focus) {
+            // Epic 10-14 day circumnavigation of Long Island Sound
+            return [
+                {
+                    day: 1,
+                    title: 'Set Off - Port Washington',
+                    route: [{ from: start, to: 'port-washington', overnight: 'port-washington' }]
+                },
+                {
+                    day: 2,
+                    title: 'Cross the Sound to Norwalk',
+                    route: [{ from: 'port-washington', to: 'norwalk', overnight: 'norwalk' }]
+                },
+                {
+                    day: 3,
+                    title: 'Maritime Aquarium Day',
+                    route: [{ from: 'norwalk', to: 'westport', overnight: 'westport', activities: ['Full aquarium day'] }]
+                },
+                {
+                    day: 4,
+                    title: 'Continue East to Milford',
+                    route: [{ from: 'westport', to: 'milford', overnight: 'milford' }]
+                },
+                {
+                    day: 5,
+                    title: 'Thimble Islands Exploration',
+                    route: [{ from: 'milford', to: 'branford', overnight: 'branford' }]
+                },
+                {
+                    day: 6,
+                    title: 'Historic Essex',
+                    route: [{ from: 'branford', to: 'essex', overnight: 'essex' }]
+                },
+                {
+                    day: 7,
+                    title: 'Essex Steam Train & Riverboat',
+                    route: [{ from: 'essex', to: 'clinton', overnight: 'clinton', activities: ['Train ride'] }]
+                },
+                {
+                    day: 8,
+                    title: 'Mystic - Your Major Destination',
+                    route: [{ from: 'clinton', to: 'mystic', overnight: 'mystic' }]
+                },
+                {
+                    day: 9,
+                    title: 'Full Mystic Experience Day',
+                    route: [{ from: 'mystic', to: 'noank', overnight: 'noank', activities: ['Seaport & Aquarium'] }]
+                },
+                {
+                    day: 10,
+                    title: 'Cross Back - Greenport',
+                    route: [{ from: 'noank', to: 'greenport', overnight: 'greenport' }]
+                },
+                {
+                    day: 11,
+                    title: 'Shelter Island Relaxation',
+                    route: [{ from: 'greenport', to: 'shelter-island', overnight: 'shelter-island' }]
+                },
+                {
+                    day: 12,
+                    title: 'Sag Harbor Culture',
+                    route: [{ from: 'shelter-island', to: 'sag-harbor', overnight: 'sag-harbor' }]
+                },
+                {
+                    day: 13,
+                    title: 'Port Jefferson Return',
+                    route: [{ from: 'sag-harbor', to: 'port-jefferson', overnight: 'port-jefferson' }]
+                },
+                {
+                    day: 14,
+                    title: 'Final Journey Home',
+                    route: [{ from: 'port-jefferson', to: start }]
+                }
+            ];
+        }
+
+        function displayItinerary(itinerary, duration, kidsAges) {
+            const container = document.getElementById('itineraryContainer');
+
+            // Calculate total distance
+            let totalDistance = 0;
+            itinerary.forEach(day => {
+                day.route.forEach(leg => {
+                    totalDistance += calculateDistance(leg.from, leg.to);
+                });
+            });
+
+            const avgDailyDistance = (totalDistance / itinerary.length).toFixed(1);
+
+            let html = `
+                <div class="itinerary-header">
+                    <h2>Your Custom ${duration.charAt(0).toUpperCase() + duration.slice(1)} Sailing Itinerary</h2>
+                    <p style="color: #666; margin-top: 10px;">
+                        Perfect for ${kidsAges || 'your family'} • Long Island Sound & Connecticut Coast
+                    </p>
+                    <div class="itinerary-stats">
+                        <div class="stat">
+                            <div class="stat-value">${itinerary.length}</div>
+                            <div class="stat-label">Days</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${Math.round(totalDistance)}</div>
+                            <div class="stat-label">Total NM</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${avgDailyDistance}</div>
+                            <div class="stat-label">Avg Daily NM</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${itinerary.length - 1}</div>
+                            <div class="stat-label">Ports</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            itinerary.forEach(day => {
+                html += `
+                    <div class="day-section">
+                        <div class="day-header">
+                            <div class="day-number">${day.day}</div>
+                            <div class="day-title">
+                                <h3>${day.title}</h3>
+                                <div class="day-subtitle">
+                                    ${day.route.map(leg => {
+                                        const dist = calculateDistance(leg.from, leg.to);
+                                        const hours = Math.round((dist / 5) * 10) / 10; // Assuming 5 knots avg
+                                        return `${destinations[leg.from]?.name || leg.from} → ${destinations[leg.to]?.name || leg.to}`;
+                                    }).join(' • ')}
+                                </div>
+                            </div>
+                        </div>
+                `;
+
+                day.route.forEach(leg => {
+                    const dist = calculateDistance(leg.from, leg.to);
+                    const hours = Math.round((dist / 5) * 10) / 10;
+                    const dest = destinations[leg.to];
+
+                    if (dest) {
+                        html += `
+                            <div class="location-card">
+                                <div class="location-header">
+                                    <div class="location-icon">⛵</div>
+                                    <div class="location-info">
+                                        <h4>${dest.name}, ${dest.state}</h4>
+                                        <div class="location-distance">
+                                            ${dist} NM • ~${hours} hours sailing ${leg.overnight ? '• Overnight' : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="location-description">
+                                    ${dest.description}
+                                </div>
+                                <div class="activities">
+                                    ${dest.activities.map(act => `<div class="activity-tag">${getActivityEmoji(act)} ${act}</div>`).join('')}
+                                </div>
+                                <div class="highlights">
+                                    <h5>🌟 Family Highlights</h5>
+                                    <ul>
+                                        ${dest.highlights.map(h => `<li>${h}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    if (leg.activities && leg.activities.length > 0) {
+                        html += `
+                            <div class="route-info">
+                                <h4>🎯 Planned Activities</h4>
+                                <ul style="padding-left: 20px; margin-top: 10px;">
+                                    ${leg.activities.map(act => `<li style="margin: 5px 0;">${act}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    }
+                });
+
+                html += '</div>';
+            });
+
+            // Add family sailing tips
+            html += `
+                <div class="tips-section">
+                    <h3>👨‍👩‍👧‍👦 Family Sailing Tips for Long Island Sound</h3>
+                    <ul>
+                        <li><strong>Weather:</strong> Check marine forecasts daily. LIS can get choppy with south winds. Plan morning departures when winds are typically lighter.</li>
+                        <li><strong>Safety:</strong> Kids in PFDs at all times underway. Have kid-sized life jackets that fit properly.</li>
+                        <li><strong>Timing:</strong> Plan arrivals before dark. Most harbors are well-marked but easier in daylight.</li>
+                        <li><strong>Provisions:</strong> Stock plenty of snacks and drinks. Many marinas have grocery delivery.</li>
+                        <li><strong>Entertainment:</strong> Bring books, games, and fishing gear for downtime at anchor.</li>
+                        <li><strong>Flexibility:</strong> Weather changes quickly - be ready to adjust plans and stay an extra day.</li>
+                        <li><strong>Early Start:</strong> Leave early to beat afternoon winds and have plenty of time to explore.</li>
+                        <li><strong>Communications:</strong> VHF radio mandatory. Cell coverage is generally good throughout LIS.</li>
+                        <li><strong>Swimming:</strong> Water temps are best July-August (70-75°F). Earlier and later can be chilly.</li>
+                        <li><strong>Reservations:</strong> Call ahead for marina slips in peak season (July-August weekends).</li>
+                    </ul>
+                </div>
+                <div style="text-align: center; padding: 20px;">
+                    <button class="print-btn" onclick="window.print()">🖨️ Print Itinerary</button>
+                    <button class="print-btn" onclick="generateItinerary()" style="margin-left: 10px;">🔄 Generate New Itinerary</button>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            container.classList.add('show');
+
+            // Scroll to itinerary
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function getActivityEmoji(activity) {
+            const emojis = {
+                'Swimming': '🏊',
+                'Beach': '🏖️',
+                'Historic Sites': '🏛️',
+                'Restaurants': '🍽️',
+                'Museums': '🏛️',
+                'Shopping': '🛍️',
+                'Dining': '🍴',
+                'Mini Golf': '⛳',
+                'Carousel': '🎠',
+                'Nature': '🌲',
+                'Kayaking': '🛶',
+                'Marina': '⚓',
+                'Playground': '🎪',
+                'Aquarium': '🐠',
+                'Island Tour': '🏝️',
+                'Trains': '🚂',
+                'Lighthouse': '🗼',
+                'Seaport': '⛵',
+                'Picnic': '🧺',
+                'Biking': '🚴',
+                'Park': '🌳'
+            };
+            return emojis[activity] || '⭐';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Long Island Sound Cruise Planner loaded!');
+        });
+    </script>
+</body>
+</html>

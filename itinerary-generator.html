@@ -380,14 +380,179 @@
             }
         }
 
+        /* Collapsible Sections */
+        .section-header {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #e1e8ed;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            border-color: #0066cc;
+            background: #f8f9fa;
+        }
+
+        .section-header h3 {
+            font-size: 18px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-toggle {
+            font-size: 24px;
+            color: #0066cc;
+            transition: transform 0.3s ease;
+        }
+
+        .section-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .section-content.open {
+            max-height: 2000px;
+        }
+
+        .section-inner {
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #e1e8ed;
+            border-top: none;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            margin-top: -15px;
+        }
+
+        /* Checkbox Grid */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #0066cc;
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Info boxes */
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .warning-box {
+            background: #fff9e6;
+            border-left: 4px solid #ffa502;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .fuel-info, .provisioning-info, .weather-info {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .fuel-info h5, .provisioning-info h5, .weather-info h5 {
+            color: #0066cc;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .alternative-route {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #666;
+        }
+
+        .alternative-route h5 {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .control-group {
+                grid-template-columns: 1fr;
+            }
+
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .itinerary-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .day-number {
+                margin-bottom: 10px;
+            }
+        }
+
         @media print {
             body {
                 background: white;
                 padding: 0;
             }
 
-            .controls, .print-btn, .generate-btn {
+            .controls, .print-btn, .generate-btn, .section-header {
                 display: none;
+            }
+
+            .section-content {
+                max-height: none !important;
             }
 
             .container {
@@ -404,6 +569,7 @@
         </div>
 
         <div class="controls">
+            <!-- Basic Trip Information -->
             <div class="control-group">
                 <div class="control-item">
                     <label>Trip Duration</label>
@@ -434,18 +600,264 @@
                 </div>
 
                 <div class="control-item">
-                    <label>Focus</label>
-                    <select id="focus">
-                        <option value="balanced">Balanced (Mix of everything)</option>
-                        <option value="relaxed">Relaxed (Short hops)</option>
-                        <option value="adventure">Adventure (More sailing)</option>
-                        <option value="educational">Educational (Museums & Nature)</option>
+                    <label>Season</label>
+                    <select id="season">
+                        <option value="spring">Spring (May-June)</option>
+                        <option value="summer" selected>Summer (July-August)</option>
+                        <option value="fall">Fall (Sept-Oct)</option>
                     </select>
                 </div>
             </div>
 
+            <!-- Sailing Preferences -->
+            <div class="section-header" onclick="toggleSection('sailing')">
+                <h3>⛵ Sailing Preferences</h3>
+                <span class="section-toggle" id="sailing-toggle">▼</span>
+            </div>
+            <div class="section-content" id="sailing-content">
+                <div class="section-inner">
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label>Experience Level</label>
+                            <select id="experience">
+                                <option value="beginner">Beginner (Cautious routes)</option>
+                                <option value="intermediate" selected>Intermediate</option>
+                                <option value="advanced">Advanced (Longer passages)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-item">
+                            <label>Max Daily Sailing Hours</label>
+                            <select id="maxHours">
+                                <option value="3">3 hours (Very relaxed)</option>
+                                <option value="4">4 hours</option>
+                                <option value="5" selected>5 hours (Moderate)</option>
+                                <option value="6">6 hours</option>
+                                <option value="7">7 hours</option>
+                                <option value="8">8 hours (Full day)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-item">
+                            <label>Departure Time</label>
+                            <select id="departTime">
+                                <option value="early">Early Bird (6-7 AM)</option>
+                                <option value="moderate" selected>Morning (8-9 AM)</option>
+                                <option value="leisurely">Leisurely (9-10 AM)</option>
+                            </select>
+                        </div>
+
+                        <div class="control-item">
+                            <label>Max Wind Comfort</label>
+                            <select id="maxWind">
+                                <option value="light">Light winds (10-15 kts)</option>
+                                <option value="moderate" selected>Moderate (15-20 kts)</option>
+                                <option value="fresh">Fresh winds (20-25 kts)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boat Specifications -->
+            <div class="section-header" onclick="toggleSection('boat')">
+                <h3>🚤 Boat Specifications</h3>
+                <span class="section-toggle" id="boat-toggle">▼</span>
+            </div>
+            <div class="section-content" id="boat-content">
+                <div class="section-inner">
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label>Draft (feet)</label>
+                            <select id="draft">
+                                <option value="3">3 ft</option>
+                                <option value="4">4 ft</option>
+                                <option value="5" selected>5 ft</option>
+                                <option value="6">6 ft</option>
+                                <option value="7">7+ ft</option>
+                            </select>
+                        </div>
+
+                        <div class="control-item">
+                            <label>Boat Length</label>
+                            <select id="boatLength">
+                                <option value="20-30">20-30 feet</option>
+                                <option value="30-40" selected>30-40 feet</option>
+                                <option value="40-50">40-50 feet</option>
+                                <option value="50+">50+ feet</option>
+                            </select>
+                        </div>
+
+                        <div class="control-item">
+                            <label>Fuel Type</label>
+                            <select id="fuelType">
+                                <option value="diesel" selected>Diesel</option>
+                                <option value="gas">Gasoline</option>
+                                <option value="both">Both</option>
+                                <option value="none">Sail only</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accommodation Preferences -->
+            <div class="section-header" onclick="toggleSection('accommodation')">
+                <h3>⚓ Accommodation Preferences</h3>
+                <span class="section-toggle" id="accommodation-toggle">▼</span>
+            </div>
+            <div class="section-content" id="accommodation-content">
+                <div class="section-inner">
+                    <div class="control-group">
+                        <div class="control-item">
+                            <label>Overnight Preference</label>
+                            <select id="overnightPref">
+                                <option value="marina">Prefer Marinas</option>
+                                <option value="mixed" selected>Mix of Both</option>
+                                <option value="anchoring">Prefer Anchoring</option>
+                            </select>
+                        </div>
+
+                        <div class="control-item">
+                            <label>Shore Power</label>
+                            <select id="shorePower">
+                                <option value="needed">Required</option>
+                                <option value="preferred" selected>Preferred</option>
+                                <option value="not-needed">Not needed</option>
+                            </select>
+                        </div>
+
+                        <div class="control-item">
+                            <label>Budget Level</label>
+                            <select id="budget">
+                                <option value="budget">Budget-Friendly</option>
+                                <option value="moderate" selected>Moderate</option>
+                                <option value="premium">Premium</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Priorities -->
+            <div class="section-header" onclick="toggleSection('activities')">
+                <h3>🎯 Activity Priorities</h3>
+                <span class="section-toggle" id="activities-toggle">▼</span>
+            </div>
+            <div class="section-content" id="activities-content">
+                <div class="section-inner">
+                    <p style="margin-bottom: 15px; color: #666;">Select activities that are important for your trip:</p>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="act-swimming" checked>
+                            <label for="act-swimming">Swimming & Beaches</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="act-museums" checked>
+                            <label for="act-museums">Museums & Educational</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="act-dining" checked>
+                            <label for="act-dining">Restaurants & Dining</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="act-watersports">
+                            <label for="act-watersports">Water Sports (Kayak/SUP)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="act-fishing">
+                            <label for="act-fishing">Fishing</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="act-shopping">
+                            <label for="act-shopping">Shopping</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="act-nature" checked>
+                            <label for="act-nature">Nature & Hiking</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="act-nightlife">
+                            <label for="act-nightlife">Nightlife & Entertainment</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Special Needs -->
+            <div class="section-header" onclick="toggleSection('special')">
+                <h3>🏥 Special Needs & Services</h3>
+                <span class="section-toggle" id="special-toggle">▼</span>
+            </div>
+            <div class="section-content" id="special-content">
+                <div class="section-inner">
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="need-laundry">
+                            <label for="need-laundry">Laundry Facilities</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="need-showers" checked>
+                            <label for="need-showers">Kid-Friendly Showers</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="need-medical">
+                            <label for="need-medical">Medical Facilities Nearby</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="need-provisioning" checked>
+                            <label for="need-provisioning">Grocery/Provisioning</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="need-fuel">
+                            <label for="need-fuel">Fuel Stops</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="need-pump">
+                            <label for="need-pump">Pump-Out Facilities</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Options -->
+            <div class="section-header" onclick="toggleSection('output')">
+                <h3>📋 Itinerary Details</h3>
+                <span class="section-toggle" id="output-toggle">▼</span>
+            </div>
+            <div class="section-content" id="output-content">
+                <div class="section-inner">
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="show-weather" checked>
+                            <label for="show-weather">Weather & Wind Tips</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="show-provisioning" checked>
+                            <label for="show-provisioning">Provisioning Info</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="show-fuel" checked>
+                            <label for="show-fuel">Fuel Stop Locations</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="show-alternatives" checked>
+                            <label for="show-alternatives">Alternative Routes (Bad Weather)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="show-tides">
+                            <label for="show-tides">Tide & Current Notes</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="show-costs">
+                            <label for="show-costs">Estimated Costs</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <button class="generate-btn" onclick="generateItinerary()">
-                🗺️ Generate My Itinerary
+                🗺️ Generate My Personalized Itinerary
             </button>
         </div>
 
@@ -455,6 +867,15 @@
     </div>
 
     <script>
+        // Toggle collapsible sections
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId + '-content');
+            const toggle = document.getElementById(sectionId + '-toggle');
+
+            content.classList.toggle('open');
+            toggle.classList.toggle('open');
+        }
+
         // Comprehensive destination database for Long Island Sound
         const destinations = {
             'centerport': {
@@ -507,7 +928,14 @@
                     'Village center with shops',
                     'Floating docks available'
                 ],
-                bestFor: 'Ages 5+'
+                bestFor: 'Ages 5+',
+                draft: 8,
+                fuel: { diesel: true, gas: true, location: 'Port Jefferson Marina' },
+                provisioning: { grocery: 'King Kullen (0.5 mi)', marina: 'Stop & Shop (1 mi)', delivery: true },
+                weatherTips: 'Well protected from all directions. Can get rolly with ferry traffic. NW winds can cause surge.',
+                tidalNotes: 'Minimal tidal current. Check ferry schedule - wakes can be significant.',
+                costs: { marina: '$4-6/ft', mooring: '$50-75', anchorage: 'free (limited space)' },
+                alternatives: 'If crowded, try Mt. Sinai Harbor (5 NM east) or Setauket Harbor (3 NM west)'
             },
             'greenport': {
                 name: 'Greenport',
@@ -520,7 +948,14 @@
                     'Excellent seafood restaurants',
                     'Splish Splash water park nearby'
                 ],
-                bestFor: 'All ages'
+                bestFor: 'All ages',
+                draft: 10,
+                fuel: { diesel: true, gas: true, location: 'Greenport Yacht & Shipbuilding, Stirling Harbor' },
+                provisioning: { grocery: 'IGA Greenport Market', marina: 'Provisions at Mitchell Park', delivery: false },
+                weatherTips: 'Protected in most conditions. N-NE winds can make approach rough. Popular summer weekends - reserve ahead.',
+                tidalNotes: 'Minimal current. Good all-tide access. Watch for ferry traffic to Shelter Island.',
+                costs: { marina: '$5-7/ft', mooring: '$60-90', anchorage: 'free (Stirling Basin)' },
+                alternatives: 'Shelter Island (5 NM south) for quieter setting or Sag Harbor (7 NM south)'
             },
             'shelter-island': {
                 name: 'Shelter Island',
@@ -559,7 +994,14 @@
                     'SoNo district shopping',
                     'Excellent pizza'
                 ],
-                bestFor: 'All ages'
+                bestFor: 'All ages',
+                draft: 10,
+                fuel: { diesel: true, gas: true, location: 'Rex Marine Center, Calf Pasture Marina' },
+                provisioning: { grocery: 'Stew Leonard\'s (famous!)', marina: 'Whole Foods (2 mi)', delivery: true },
+                weatherTips: 'Norwalk Islands provide good protection. SW winds can make harbor entrance choppy. Best approach at high tide.',
+                tidalNotes: 'Norwalk River has 6-7ft tidal range. Time entrance near high tide. Current can run 2+ knots.',
+                costs: { marina: '$4-7/ft', mooring: '$75-100', anchorage: 'free (Sheffield Island area)' },
+                alternatives: 'Westport (8 NM west) or Stamford (10 NM west) for weather protection'
             },
             'westport': {
                 name: 'Westport',
@@ -637,7 +1079,14 @@
                     'Historic ships to explore',
                     'Mystic Pizza!'
                 ],
-                bestFor: 'All ages - don\'t miss!'
+                bestFor: 'All ages - don\'t miss!',
+                draft: 12,
+                fuel: { diesel: true, gas: true, location: 'Mystic Shipyard, Mystic Marina' },
+                provisioning: { grocery: 'Stop & Shop, Mystic Market', marina: 'Multiple options downtown', delivery: true },
+                weatherTips: 'Mystic River entrance can have strong current. Good protection once inside. Popular - arrive early or reserve.',
+                tidalNotes: 'Strong tidal current at entrance (3-4 kts). Enter at slack tide. Drawbridge opens on schedule.',
+                costs: { marina: '$5-8/ft', mooring: '$80-120', anchorage: 'Limited free space downriver' },
+                alternatives: 'Stonington (4 NM east) less crowded, or Noank (2 NM west) for quiet anchorage'
             },
             'stonington': {
                 name: 'Stonington',
@@ -1194,6 +1643,14 @@
                     const dest = destinations[leg.to];
 
                     if (dest) {
+                        // Check which optional info to show
+                        const showWeather = document.getElementById('show-weather')?.checked;
+                        const showFuel = document.getElementById('show-fuel')?.checked;
+                        const showProvisioning = document.getElementById('show-provisioning')?.checked;
+                        const showAlternatives = document.getElementById('show-alternatives')?.checked;
+                        const showTides = document.getElementById('show-tides')?.checked;
+                        const showCosts = document.getElementById('show-costs')?.checked;
+
                         html += `
                             <div class="location-card">
                                 <div class="location-header">
@@ -1202,6 +1659,7 @@
                                         <h4>${dest.name}, ${dest.state}</h4>
                                         <div class="location-distance">
                                             ${dist} NM • ~${hours} hours sailing ${leg.overnight ? '• Overnight' : ''}
+                                            ${dest.draft ? ` • Min depth: ${dest.draft}ft` : ''}
                                         </div>
                                     </div>
                                 </div>
@@ -1217,6 +1675,56 @@
                                         ${dest.highlights.map(h => `<li>${h}</li>`).join('')}
                                     </ul>
                                 </div>
+
+                                ${showWeather && dest.weatherTips ? `
+                                    <div class="weather-info">
+                                        <h5>⛅ Weather & Harbor Tips</h5>
+                                        <p style="margin: 0; font-size: 14px;">${dest.weatherTips}</p>
+                                    </div>
+                                ` : ''}
+
+                                ${showTides && dest.tidalNotes ? `
+                                    <div class="weather-info">
+                                        <h5>🌊 Tides & Currents</h5>
+                                        <p style="margin: 0; font-size: 14px;">${dest.tidalNotes}</p>
+                                    </div>
+                                ` : ''}
+
+                                ${showFuel && dest.fuel ? `
+                                    <div class="fuel-info">
+                                        <h5>⛽ Fuel Available</h5>
+                                        <p style="margin: 0; font-size: 14px;">
+                                            ${dest.fuel.diesel ? '✓ Diesel' : ''} ${dest.fuel.gas ? '✓ Gas' : ''}
+                                            ${dest.fuel.location ? `<br>Location: ${dest.fuel.location}` : ''}
+                                        </p>
+                                    </div>
+                                ` : ''}
+
+                                ${showProvisioning && dest.provisioning ? `
+                                    <div class="provisioning-info">
+                                        <h5>🛒 Provisioning</h5>
+                                        <p style="margin: 0; font-size: 14px;">
+                                            ${dest.provisioning.grocery ? `Grocery: ${dest.provisioning.grocery}` : ''}
+                                            ${dest.provisioning.delivery ? '<br>✓ Delivery available' : ''}
+                                        </p>
+                                    </div>
+                                ` : ''}
+
+                                ${showCosts && dest.costs ? `
+                                    <div class="info-box">
+                                        <strong>💰 Estimated Costs</strong><br>
+                                        ${dest.costs.marina ? `Marina: ${dest.costs.marina}/night` : ''}
+                                        ${dest.costs.mooring ? ` • Mooring: ${dest.costs.mooring}` : ''}
+                                        ${dest.costs.anchorage ? ` • Anchorage: ${dest.costs.anchorage}` : ''}
+                                    </div>
+                                ` : ''}
+
+                                ${showAlternatives && dest.alternatives ? `
+                                    <div class="alternative-route">
+                                        <h5>⚓ Alternative Options</h5>
+                                        <p style="margin: 0; font-size: 14px;">${dest.alternatives}</p>
+                                    </div>
+                                ` : ''}
                             </div>
                         `;
                     }

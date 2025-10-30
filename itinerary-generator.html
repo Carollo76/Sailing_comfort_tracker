@@ -710,32 +710,77 @@
         function calculateDistance(from, to) {
             // Approximate nautical miles between major points
             const distances = {
+                // Centerport routes
                 'centerport-port-jefferson': 10,
-                'centerport-oyster-bay': 12,
-                'centerport-port-washington': 15,
-                'centerport-norwalk': 15,
-                'centerport-greenport': 35,
-                'centerport-stamford': 18,
+                'centerport-oyster-bay': 15,
+                'centerport-port-washington': 18,
+                'centerport-norwalk': 18,
+                'centerport-greenport': 38,
+                'centerport-stamford': 20,
                 'centerport-westport': 16,
-                'centerport-shelter-island': 38,
+                'centerport-shelter-island': 40,
+                'centerport-sag-harbor': 42,
+
+                // Long Island North Shore routes
                 'oyster-bay-port-washington': 8,
-                'port-washington-port-jefferson': 18,
-                'port-jefferson-greenport': 25,
+                'port-washington-port-jefferson': 20,
+                'port-jefferson-greenport': 28,
+                'port-jefferson-shelter-island': 30,
+                'port-jefferson-sag-harbor': 32,
+
+                // Greenport, Shelter Island, Sag Harbor area
                 'greenport-shelter-island': 5,
+                'greenport-sag-harbor': 7,
                 'shelter-island-sag-harbor': 3,
-                'oyster-bay-norwalk': 12,
+                'shelter-island-port-jefferson': 30,
+                'sag-harbor-port-jefferson': 32,
+
+                // Cross-Sound routes (NY to CT)
+                'oyster-bay-norwalk': 15,
+                'port-washington-norwalk': 12,
+                'port-jefferson-norwalk': 25,
+                'port-jefferson-bridgeport': 20,
+                'greenport-mystic': 18,
+                'greenport-stonington': 20,
+                'shelter-island-mystic': 20,
+                'sag-harbor-mystic': 22,
+
+                // Connecticut coastal routes
                 'norwalk-westport': 8,
+                'norwalk-stamford': 10,
+                'westport-stamford': 6,
+                'westport-bridgeport': 10,
                 'westport-black-rock': 12,
-                'black-rock-milford': 8,
-                'milford-branford': 7,
-                'branford-clinton': 10,
-                'clinton-essex': 15,
-                'essex-mystic': 25,
+                'black-rock-bridgeport': 2,
+                'bridgeport-milford': 8,
+                'milford-branford': 10,
+                'branford-clinton': 8,
+                'clinton-essex': 12,
+                'essex-mystic': 28,
                 'mystic-stonington': 4,
                 'stonington-noank': 2,
+                'noank-mystic': 2,
+
+                // Connecticut to Connecticut (longer routes)
+                'norwalk-milford': 18,
+                'norwalk-branford': 25,
+                'norwalk-essex': 38,
+                'norwalk-mystic': 60,
+                'stamford-mystic': 65,
+                'bridgeport-mystic': 45,
+                'bridgeport-essex': 25,
+                'milford-essex': 20,
+
+                // Special destinations
                 'norwalk-sheffield-island': 6,
+                'stamford-sheffield-island': 8,
+
+                // Block Island (longer passages)
                 'mystic-block-island': 35,
-                'greenport-block-island': 40
+                'stonington-block-island': 32,
+                'greenport-block-island': 42,
+                'shelter-island-block-island': 40,
+                'sag-harbor-block-island': 38
             };
 
             const key = `${from}-${to}`;
